@@ -138,10 +138,13 @@ src/
 2. **Edit Ownership**: Click on any game to access the Platform Ownership section
 3. **Set Ownership Details**:
    - Mark platforms as owned/not owned
-   - Choose ownership type: Physical, Digital, Subscription, or Other
+   - Choose storefront: Steam, Epic Games Store, PlayStation Store, Xbox Store, Nintendo eShop, and many more
+   - Select subscription service: Xbox Game Pass, PlayStation Plus, EA Play, Ubisoft+, and others
    - Add purchase date and price
    - Include optional notes
 4. **Filter by Ownership**: Use the "All Ownership" filter in the Library to show only owned or not owned games
+5. **Track Storefronts**: Monitor which digital storefronts you use most
+6. **Monitor Subscriptions**: Keep track of games accessed through subscription services
 
 ### Wishlist Management
 1. **Add to Wishlist**: Click the heart icon on any game card to add it to your wishlist

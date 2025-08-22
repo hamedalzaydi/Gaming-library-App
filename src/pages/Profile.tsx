@@ -9,7 +9,9 @@ import {
   Target,
   Award,
   Heart,
-  Gamepad2
+  Gamepad2,
+  Store,
+  CreditCard
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 
@@ -32,8 +34,15 @@ export default function Profile() {
           // Count games per platform
           acc.platforms[ownership.platform] = (acc.platforms[ownership.platform] || 0) + 1
           
-          // Count ownership types
-          acc.ownershipTypes[ownership.ownershipType] = (acc.ownershipTypes[ownership.ownershipType] || 0) + 1
+          // Count games per storefront
+          if (ownership.storefront) {
+            acc.storefronts[ownership.storefront] = (acc.storefronts[ownership.storefront] || 0) + 1
+          }
+          
+          // Count games per subscription service
+          if (ownership.subscriptionService) {
+            acc.subscriptions[ownership.subscriptionService] = (acc.subscriptions[ownership.subscriptionService] || 0) + 1
+          }
           
           // Total owned games
           acc.totalOwned++
@@ -42,7 +51,8 @@ export default function Profile() {
       return acc
     }, {
       platforms: {} as Record<string, number>,
-      ownershipTypes: {} as Record<string, number>,
+      storefronts: {} as Record<string, number>,
+      subscriptions: {} as Record<string, number>,
       totalOwned: 0
     })
     
@@ -91,24 +101,16 @@ export default function Profile() {
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
 
-    // Get platform distribution
-    const platformCounts: Record<string, number> = {}
-    games.forEach(game => {
-      game.platforms?.forEach(platform => {
-        platformCounts[platform] = (platformCounts[platform] || 0) + 1
-      })
-    })
-    const topPlatforms = Object.entries(platformCounts)
+    // Top platforms, storefronts, and subscriptions
+    const topPlatforms = Object.entries(platformOwnershipStats.platforms)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
-
-    // Get top owned platforms
-    const topOwnedPlatforms = Object.entries(platformOwnershipStats.platforms)
+    
+    const topStorefronts = Object.entries(platformOwnershipStats.storefronts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
-
-    // Get top ownership types
-    const topOwnershipTypes = Object.entries(platformOwnershipStats.ownershipTypes)
+    
+    const topSubscriptions = Object.entries(platformOwnershipStats.subscriptions)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
 
@@ -129,8 +131,9 @@ export default function Profile() {
       wishlistedGames,
       topGenres,
       topPlatforms,
-      topOwnedPlatforms,
-      topOwnershipTypes,
+      topOwnedPlatforms: topPlatforms, // Renamed for consistency
+      topStorefronts,
+      topSubscriptions,
       totalPlaytime
     }
   }, [state.games])
@@ -424,17 +427,43 @@ export default function Profile() {
           <div className="card">
             <h3 className="text-lg font-semibold text-white mb-4">Ownership Types</h3>
             <div className="space-y-3">
-              {stats.topOwnershipTypes.length === 0 ? (
+              {stats.topStorefronts.length === 0 ? (
                 <div className="text-center py-4">
-                  <Gamepad2 className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">No ownership data yet</p>
+                  <Store className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">No storefront data yet</p>
                 </div>
               ) : (
-                stats.topOwnershipTypes.map(([type, count], index) => (
-                  <div key={type} className="flex items-center justify-between">
+                stats.topStorefronts.map(([storefront, count], index) => (
+                  <div key={storefront} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <span className="text-lg font-bold text-purple-400">#{index + 1}</span>
-                      <span className="text-gray-300 capitalize">{type}</span>
+                      <span className="text-gray-300 capitalize">{storefront}</span>
+                    </div>
+                    <span className="text-white font-semibold">{count}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Top Subscription Services */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+              <CreditCard className="w-5 h-5 text-green-400" />
+              <span>Top Subscriptions</span>
+            </h3>
+            <div className="space-y-3">
+              {stats.topSubscriptions.length === 0 ? (
+                <div className="text-center py-4">
+                  <CreditCard className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">No subscription data yet</p>
+                </div>
+              ) : (
+                stats.topSubscriptions.map(([subscription, count], index) => (
+                  <div key={subscription} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg font-bold text-green-400">#{index + 1}</span>
+                      <span className="text-gray-300">{subscription}</span>
                     </div>
                     <span className="text-white font-semibold">{count}</span>
                   </div>

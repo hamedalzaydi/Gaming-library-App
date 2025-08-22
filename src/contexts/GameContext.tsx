@@ -21,11 +21,30 @@ export interface Game {
 export interface PlatformOwnership {
   platform: string
   owned: boolean
-  ownershipType: 'physical' | 'digital' | 'subscription' | 'other'
+  storefront: Storefront | null
+  subscriptionService: SubscriptionService | null
   purchaseDate?: string
   purchasePrice?: number
   notes?: string
 }
+
+export type Storefront = 
+  // PC Storefronts
+  | 'Steam' | 'Epic Games Store' | 'GOG Galaxy' | 'Battle.net' | 'Origin' | 'EA App' | 'Ubisoft Connect' | 'Rockstar Games Launcher' | 'Bethesda.net' | 'Microsoft Store' | 'itch.io' | 'Humble Store' | 'Green Man Gaming' | 'Fanatical'
+  // Console Storefronts
+  | 'PlayStation Store' | 'Xbox Store' | 'Nintendo eShop'
+  // Mobile Storefronts
+  | 'App Store' | 'Google Play Store' | 'Amazon Appstore'
+  // Other
+  | 'Other'
+
+export type SubscriptionService = 
+  // PC Subscriptions
+  | 'Xbox Game Pass (PC)' | 'EA Play' | 'Ubisoft+' | 'Apple Arcade' | 'Amazon Prime Gaming'
+  // Console Subscriptions
+  | 'Xbox Game Pass (Console)' | 'Xbox Game Pass Ultimate' | 'PlayStation Plus' | 'PlayStation Now' | 'Nintendo Switch Online'
+  // Other
+  | 'Other' | null
 
 export interface GameState {
   games: Game[]

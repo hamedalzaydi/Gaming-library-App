@@ -179,7 +179,8 @@ class IGDBService {
     const platformOwnership = igdbGame.platforms?.map(platform => ({
       platform: platform.name,
       owned: false,
-      ownershipType: 'other' as const,
+      storefront: null,
+      subscriptionService: null,
       purchaseDate: undefined,
       purchasePrice: undefined,
       notes: undefined,
