@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import Library from './pages/Library'
 import Search from './pages/Search'
+import Wishlist from './pages/Wishlist'
 import GameDetails from './pages/GameDetails'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/library" element={<Library />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/game/:id" element={<GameDetails />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

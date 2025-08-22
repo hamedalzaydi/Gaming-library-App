@@ -133,11 +133,18 @@ src/
 3. Click on any game to view details
 4. Change status, add ratings, or update playtime
 
+### Wishlist Management
+1. **Add to Wishlist**: Click the heart icon on any game card to add it to your wishlist
+2. **View Wishlist**: Navigate to the **Wishlist** page to see all wishlisted games
+3. **Filter & Sort**: Use the same filtering and sorting options as the main library
+4. **Toggle Status**: Games can be both in your library and wishlist simultaneously
+
 ### Tracking Progress
 - **Playing**: Games you're currently playing
 - **Completed**: Games you've finished
 - **Backlog**: Games you want to play
 - **Dropped**: Games you've stopped playing
+- **Wishlist**: Games you're interested in but haven't added to your library yet
 
 ### Exporting Data
 1. Go to **Settings** → **Data Management**
@@ -214,7 +221,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Mobile app (React Native)
 - [ ] Social features (friend lists, recommendations)
 - [ ] Game completion tracking
-- [ ] Wishlist functionality
 - [ ] Game time tracking integration
 - [ ] Achievement sharing
 - [ ] Multi-language support

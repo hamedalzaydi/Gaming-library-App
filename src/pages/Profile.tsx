@@ -7,7 +7,8 @@ import {
   Star,
   TrendingUp,
   Target,
-  Award
+  Award,
+  Heart
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 
@@ -21,6 +22,7 @@ export default function Profile() {
     const completed = games.filter(g => g.status === 'completed').length
     const backlog = games.filter(g => g.status === 'backlog').length
     const dropped = games.filter(g => g.status === 'dropped').length
+    const wishlisted = games.filter(g => g.wishlisted).length
     
     const totalRating = games.reduce((sum, g) => sum + (g.rating || 0), 0)
     const ratedGames = games.filter(g => g.rating).length
@@ -47,6 +49,12 @@ export default function Profile() {
 
     // Get recent additions
     const recentAdditions = games
+      .sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime())
+      .slice(0, 5)
+
+    // Get wishlisted games
+    const wishlistedGames = games
+      .filter(g => g.wishlisted)
       .sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime())
       .slice(0, 5)
 
@@ -78,12 +86,14 @@ export default function Profile() {
       completed,
       backlog,
       dropped,
+      wishlisted,
       averageRating: Math.round(averageRating),
       averagePlaytime: Math.round(averagePlaytime * 10) / 10,
       completionRate: Math.round(completionRate),
       topRated,
       mostPlayed,
       recentAdditions,
+      wishlistedGames,
       topGenres,
       topPlatforms,
       totalPlaytime
@@ -102,6 +112,9 @@ export default function Profile() {
     
     if (stats.completionRate >= 50) achievements.push({ name: 'Efficient Gamer', description: '50%+ completion rate', icon: Target, color: 'text-green-400' })
     if (stats.completionRate >= 75) achievements.push({ name: 'Dedicated Gamer', description: '75%+ completion rate', icon: Target, color: 'text-green-400' })
+    
+    if (stats.wishlisted >= 5) achievements.push({ name: 'Dreamer', description: 'Added 5+ games to wishlist', icon: Heart, color: 'text-pink-400' })
+    if (stats.wishlisted >= 20) achievements.push({ name: 'Wishful Thinker', description: 'Added 20+ games to wishlist', icon: Heart, color: 'text-pink-400' })
     
     if (stats.totalPlaytime >= 100) achievements.push({ name: 'Time Sink', description: '100+ hours played', icon: Clock, color: 'text-purple-400' })
     if (stats.totalPlaytime >= 500) achievements.push({ name: 'Time Master', description: '500+ hours played', icon: Clock, color: 'text-purple-400' })
@@ -303,6 +316,37 @@ export default function Profile() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Wishlisted Games */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+              <Heart className="w-5 h-5 text-pink-400" />
+              <span>Wishlist</span>
+            </h3>
+            <div className="space-y-3">
+              {stats.wishlistedGames.length === 0 ? (
+                <div className="text-center py-4">
+                  <Heart className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">No wishlisted games yet</p>
+                </div>
+              ) : (
+                stats.wishlistedGames.map((game, index) => (
+                  <div key={game.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg font-bold text-pink-400">#{index + 1}</span>
+                      <span className="text-gray-300">{game.name}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="w-4 h-4 text-pink-400 fill-current" />
+                      <span className="text-white font-semibold">
+                        {new Date(game.addedDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

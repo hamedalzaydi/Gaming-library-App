@@ -11,7 +11,8 @@ import {
   Gamepad2,
   BarChart3,
   Clock,
-  Trophy
+  Trophy,
+  Heart
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 
@@ -28,6 +29,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Home', href: '/', icon: Home },
     { name: 'Library', href: '/library', icon: Library },
     { name: 'Search', href: '/search', icon: Search },
+    { name: 'Wishlist', href: '/wishlist', icon: Heart },
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Settings', href: '/settings', icon: Settings },
   ]
@@ -56,6 +58,12 @@ export default function Layout({ children }: LayoutProps) {
       value: state.games.filter(g => g.status === 'backlog').length,
       icon: BarChart3,
       color: 'text-yellow-400',
+    },
+    {
+      name: 'Wishlist',
+      value: state.games.filter(g => g.wishlisted).length,
+      icon: Heart,
+      color: 'text-pink-400',
     },
   ]
 

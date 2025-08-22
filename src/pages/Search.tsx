@@ -7,13 +7,14 @@ import {
   Star,
   Calendar,
   Filter,
-  X
+  X,
+  Heart
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 import { igdbService, IGDBGame } from '../services/igdbService'
 
 export default function Search() {
-  const { addGame, state } = useGame()
+  const { addGame, state, toggleWishlist } = useGame()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<IGDBGame[]>([])
   const [loading, setLoading] = useState(false)
@@ -89,13 +90,6 @@ export default function Search() {
   }
 
   const handleAddGame = (igdbGame: IGDBGame) => {
-    // Check if game is already in library
-    const existingGame = state.games.find(g => g.id === igdbGame.id)
-    if (existingGame) {
-      alert('This game is already in your library!')
-      return
-    }
-
     const gameData = igdbService.convertToGame(igdbGame)
     addGame(gameData)
     
@@ -113,6 +107,26 @@ export default function Search() {
         button.className = 'w-full btn-primary'
       }, 2000)
     }
+  }
+
+  const handleWishlistToggle = (igdbGame: IGDBGame) => {
+    // Check if game is already in library
+    const existingGame = state.games.find(g => g.id === igdbGame.id)
+    
+    if (existingGame) {
+      // If game exists in library, toggle its wishlist status
+      toggleWishlist(existingGame.id)
+    } else {
+      // If game doesn't exist in library, add it as wishlisted
+      const gameData = igdbService.convertToGame(igdbGame)
+      const wishlistedGame = { ...gameData, wishlisted: true }
+      addGame(wishlistedGame)
+    }
+  }
+
+  const isGameWishlisted = (igdbGame: IGDBGame) => {
+    const existingGame = state.games.find(g => g.id === igdbGame.id)
+    return existingGame?.wishlisted || false
   }
 
   const filteredResults = searchResults.filter(game => {
@@ -265,6 +279,7 @@ export default function Search() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredResults.map((game) => {
                 const isInLibrary = state.games.some(g => g.id === game.id)
+                const isWishlisted = isGameWishlisted(game)
                 
                 return (
                   <div key={game.id} className="game-card group">
@@ -281,9 +296,24 @@ export default function Search() {
                         </div>
                       )}
                       
+                      {/* Wishlist Button */}
+                      <div className="absolute top-2 right-2">
+                        <button
+                          onClick={() => handleWishlistToggle(game)}
+                          className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+                            isWishlisted 
+                              ? 'bg-pink-600/90 text-white shadow-lg' 
+                              : 'bg-dark-900/80 text-gray-300 hover:text-white hover:bg-dark-700'
+                          }`}
+                          title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                        >
+                          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                        </button>
+                      </div>
+                      
                       {/* Rating */}
                       {game.aggregated_rating && (
-                        <div className="absolute top-2 right-2 bg-dark-900/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                        <div className="absolute top-2 right-12 bg-dark-900/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
                           <Star className="w-3 h-3 text-yellow-400 fill-current" />
                           <span className="text-xs font-medium text-white">
                             {Math.round(game.aggregated_rating)}

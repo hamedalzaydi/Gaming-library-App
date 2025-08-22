@@ -186,6 +186,7 @@ class IGDBService {
       rating: igdbGame.aggregated_rating || igdbGame.rating,
       status: 'backlog' as const,
       addedDate: new Date().toISOString(),
+      wishlisted: false,
     }
   }
 }

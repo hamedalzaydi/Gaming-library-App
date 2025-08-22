@@ -14,7 +14,7 @@ export interface Game {
   status: 'playing' | 'completed' | 'backlog' | 'dropped'
   addedDate: string
   notes?: string
-  rating?: number
+  wishlisted: boolean
 }
 
 export interface GameState {
@@ -34,6 +34,7 @@ export type GameAction =
   | { type: 'SET_GAMES'; payload: Game[] }
   | { type: 'SET_SEARCH_RESULTS'; payload: Game[] }
   | { type: 'SET_CURRENT_GAME'; payload: Game | null }
+  | { type: 'TOGGLE_WISHLIST'; payload: number }
 
 // Initial state
 const initialState: GameState = {
@@ -71,6 +72,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, searchResults: action.payload }
     case 'SET_CURRENT_GAME':
       return { ...state, currentGame: action.payload }
+    case 'TOGGLE_WISHLIST':
+      return {
+        ...state,
+        games: state.games.map(game =>
+          game.id === action.payload ? { ...game, wishlisted: !game.wishlisted } : game
+        ),
+      }
     default:
       return state
   }
@@ -85,6 +93,8 @@ interface GameContextType {
   removeGame: (id: number) => void
   searchGames: (query: string) => Promise<void>
   getGameById: (id: number) => Game | undefined
+  toggleWishlist: (id: number) => void
+  getWishlistedGames: () => Game[]
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -117,6 +127,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       ...gameData,
       id: Date.now(),
       addedDate: new Date().toISOString(),
+      wishlisted: gameData.wishlisted || false,
     }
     dispatch({ type: 'ADD_GAME', payload: newGame })
   }
@@ -157,6 +168,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return state.games.find(game => game.id === id)
   }
 
+  const toggleWishlist = (id: number) => {
+    dispatch({ type: 'TOGGLE_WISHLIST', payload: id })
+  }
+
+  const getWishlistedGames = () => {
+    return state.games.filter(game => game.wishlisted)
+  }
+
   const value: GameContextType = {
     state,
     dispatch,
@@ -165,6 +184,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     removeGame,
     searchGames,
     getGameById,
+    toggleWishlist,
+    getWishlistedGames,
   }
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>

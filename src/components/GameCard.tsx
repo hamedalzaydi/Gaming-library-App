@@ -7,7 +7,8 @@ import {
   X, 
   Star,
   Calendar,
-  Gamepad2
+  Gamepad2,
+  Heart
 } from 'lucide-react'
 import { Game } from '../contexts/GameContext'
 import { useGame } from '../contexts/GameContext'
@@ -19,7 +20,7 @@ interface GameCardProps {
 }
 
 export default function GameCard({ game, showActions = true, onStatusChange }: GameCardProps) {
-  const { removeGame } = useGame()
+  const { removeGame, toggleWishlist } = useGame()
   const [showMenu, setShowMenu] = useState(false)
 
   const statusConfig = {
@@ -42,6 +43,10 @@ export default function GameCard({ game, showActions = true, onStatusChange }: G
     if (confirm(`Are you sure you want to remove "${game.name}" from your library?`)) {
       removeGame(game.id)
     }
+  }
+
+  const handleWishlistToggle = () => {
+    toggleWishlist(game.id)
   }
 
   return (
@@ -68,9 +73,24 @@ export default function GameCard({ game, showActions = true, onStatusChange }: G
           </span>
         </div>
 
+        {/* Wishlist Button */}
+        <div className="absolute top-2 right-2">
+          <button
+            onClick={handleWishlistToggle}
+            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+              game.wishlisted 
+                ? 'bg-pink-600/90 text-white shadow-lg' 
+                : 'bg-dark-900/80 text-gray-300 hover:text-white hover:bg-dark-700'
+            }`}
+            title={game.wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart className={`w-4 h-4 ${game.wishlisted ? 'fill-current' : ''}`} />
+          </button>
+        </div>
+
         {/* Rating */}
         {game.rating && (
-          <div className="absolute top-2 right-2 bg-dark-900/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+          <div className="absolute top-2 right-12 bg-dark-900/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Star className="w-3 h-3 text-yellow-400 fill-current" />
             <span className="text-xs font-medium text-white">
               {Math.round(game.rating)}
@@ -80,7 +100,7 @@ export default function GameCard({ game, showActions = true, onStatusChange }: G
 
         {/* Actions Menu */}
         {showActions && (
-          <div className="absolute top-2 right-2">
+          <div className="absolute bottom-2 right-2">
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
@@ -92,7 +112,7 @@ export default function GameCard({ game, showActions = true, onStatusChange }: G
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-dark-800 border border-dark-600 rounded-lg shadow-lg z-10">
+                <div className="absolute right-0 bottom-full mb-2 w-48 bg-dark-800 border border-dark-600 rounded-lg shadow-lg z-10">
                   <div className="py-1">
                     <div className="px-3 py-2 text-xs font-medium text-gray-400 uppercase">
                       Change Status
