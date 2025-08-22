@@ -4,6 +4,12 @@
 const IGDB_CLIENT_ID = import.meta.env.VITE_IGDB_CLIENT_ID
 const IGDB_CLIENT_SECRET = import.meta.env.VITE_IGDB_CLIENT_SECRET
 
+// Check if environment variables are loaded
+if (!IGDB_CLIENT_ID || !IGDB_CLIENT_SECRET) {
+  console.error('IGDB API credentials not found. Please check your .env.local file.')
+  console.error('Required variables: VITE_IGDB_CLIENT_ID and VITE_IGDB_CLIENT_SECRET')
+}
+
 interface IGDBGame {
   id: number
   name: string
@@ -35,71 +41,38 @@ interface IGDBGame {
   }>
 }
 
-interface IGDBToken {
-  access_token: string
-  expires_in: number
-  token_type: string
-}
-
 class IGDBService {
-  private accessToken: string | null = null
-  private tokenExpiry: number = 0
 
-  private async getAccessToken(): Promise<string> {
-    if (this.accessToken && Date.now() < this.tokenExpiry) {
-      return this.accessToken
-    }
 
-    try {
-      const response = await fetch('https://id.twitch.tv/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          client_id: IGDB_CLIENT_ID,
-          client_secret: IGDB_CLIENT_SECRET,
-          grant_type: 'client_credentials',
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to get access token')
-      }
-
-      const tokenData: IGDBToken = await response.json()
-      this.accessToken = tokenData.access_token
-      this.tokenExpiry = Date.now() + (tokenData.expires_in * 1000) - 60000 // 1 minute buffer
-
-      return this.accessToken
-    } catch (error) {
-      console.error('Error getting IGDB access token:', error)
-      throw new Error('Failed to authenticate with IGDB API')
-    }
-  }
 
   private async makeRequest(endpoint: string, body: string): Promise<any[]> {
-    const token = await this.getAccessToken()
+    console.log('Making IGDB request to:', endpoint)
 
-    const response = await fetch(`https://api.igdb.com/v4/${endpoint}`, {
+    const response = await fetch(`http://localhost:3001/api/igdb/${endpoint}`, {
       method: 'POST',
       headers: {
-        'Client-ID': IGDB_CLIENT_ID,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain',
       },
       body,
     })
 
+    console.log('Proxy response status:', response.status, response.statusText)
+
     if (!response.ok) {
-      throw new Error(`IGDB API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('Proxy error response:', errorText)
+      throw new Error(`Proxy error: ${response.status} - ${errorText}`)
     }
 
-    return response.json()
+    const result = await response.json()
+    console.log('Proxy response received:', result.length, 'items')
+    return result
   }
 
   async searchGames(query: string, limit: number = 20): Promise<IGDBGame[]> {
     try {
+      console.log('Searching for games:', query)
+      
       const body = `
         search "${query}";
         fields name,cover.url,summary,genres.name,platforms.name,first_release_date,rating,aggregated_rating,total_rating_count,screenshots.url,videos.video_id,websites.url,websites.category;
@@ -107,10 +80,15 @@ class IGDBService {
         where version_parent = null;
       `
 
+      console.log('IGDB query body:', body)
       const games = await this.makeRequest('games', body)
+      console.log('Search results:', games.length, 'games found')
       return games
     } catch (error) {
       console.error('Error searching games:', error)
+      if (error instanceof Error) {
+        throw error
+      }
       throw new Error('Failed to search games')
     }
   }

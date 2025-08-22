@@ -69,7 +69,19 @@ export default function Search() {
       setSearchResults(results)
     } catch (error) {
       console.error('Error searching games:', error)
-      setError('Failed to search games. Please try again.')
+      let errorMessage = 'Failed to search games. Please try again.'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('credentials not configured')) {
+          errorMessage = 'IGDB API not configured. Please check your .env.local file and restart the app.'
+        } else if (error.message.includes('Failed to authenticate')) {
+          errorMessage = 'Authentication failed. Please check your IGDB API credentials.'
+        } else if (error.message.includes('IGDB API error')) {
+          errorMessage = 'IGDB API error. Please try again later.'
+        }
+      }
+      
+      setError(errorMessage)
       setSearchResults([])
     } finally {
       setLoading(false)
@@ -379,9 +391,28 @@ export default function Search() {
         <div className="text-center py-12">
           <Gamepad2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-300 mb-2">Start searching for games</h3>
-          <p className="text-gray-400">
+          <p className="text-gray-400 mb-4">
             Use the search bar above to discover new games from the IGDB database
           </p>
+          
+          {/* API Configuration Check */}
+          {!import.meta.env.VITE_IGDB_CLIENT_ID || !import.meta.env.VITE_IGDB_CLIENT_SECRET ? (
+            <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-4 max-w-md mx-auto">
+              <h4 className="text-yellow-400 font-medium mb-2">⚠️ API Not Configured</h4>
+              <p className="text-sm text-gray-300 mb-3">
+                To search for games, you need to configure your IGDB API credentials.
+              </p>
+              <div className="text-xs text-gray-400 space-y-1">
+                <p>1. Create a <code className="bg-dark-700 px-1 rounded">.env.local</code> file in your project root</p>
+                <p>2. Add your IGDB credentials:</p>
+                <div className="bg-dark-800 p-2 rounded font-mono text-xs">
+                  VITE_IGDB_CLIENT_ID=your_client_id<br/>
+                  VITE_IGDB_CLIENT_SECRET=your_client_secret
+                </div>
+                <p>3. Restart the development server</p>
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </div>
