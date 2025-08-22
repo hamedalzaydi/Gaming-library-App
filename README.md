@@ -133,6 +133,16 @@ src/
 3. Click on any game to view details
 4. Change status, add ratings, or update playtime
 
+### Platform Ownership Management
+1. **View Ownership**: See which platforms you own each game on in the game cards and details
+2. **Edit Ownership**: Click on any game to access the Platform Ownership section
+3. **Set Ownership Details**:
+   - Mark platforms as owned/not owned
+   - Choose ownership type: Physical, Digital, Subscription, or Other
+   - Add purchase date and price
+   - Include optional notes
+4. **Filter by Ownership**: Use the "All Ownership" filter in the Library to show only owned or not owned games
+
 ### Wishlist Management
 1. **Add to Wishlist**: Click the heart icon on any game card to add it to your wishlist
 2. **View Wishlist**: Navigate to the **Wishlist** page to see all wishlisted games
@@ -144,7 +154,8 @@ src/
 - **Completed**: Games you've finished
 - **Backlog**: Games you want to play
 - **Dropped**: Games you've stopped playing
-- **Wishlist**: Games you're interested in but haven't added to your library yet
+- **Wishlist**: Games you want to play in the future
+- **Platform Ownership**: Track which platforms you own each game on and ownership details
 
 ### Exporting Data
 1. Go to **Settings** → **Data Management**

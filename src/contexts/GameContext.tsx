@@ -8,6 +8,7 @@ export interface Game {
   summary?: string
   genres?: string[]
   platforms?: string[]
+  platformOwnership?: PlatformOwnership[]
   releaseDate?: string
   rating?: number
   playtime?: number
@@ -15,6 +16,15 @@ export interface Game {
   addedDate: string
   notes?: string
   wishlisted: boolean
+}
+
+export interface PlatformOwnership {
+  platform: string
+  owned: boolean
+  ownershipType: 'physical' | 'digital' | 'subscription' | 'other'
+  purchaseDate?: string
+  purchasePrice?: number
+  notes?: string
 }
 
 export interface GameState {
@@ -35,6 +45,7 @@ export type GameAction =
   | { type: 'SET_SEARCH_RESULTS'; payload: Game[] }
   | { type: 'SET_CURRENT_GAME'; payload: Game | null }
   | { type: 'TOGGLE_WISHLIST'; payload: number }
+  | { type: 'UPDATE_PLATFORM_OWNERSHIP'; payload: { gameId: number; platformOwnership: PlatformOwnership[] } }
 
 // Initial state
 const initialState: GameState = {
@@ -79,6 +90,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           game.id === action.payload ? { ...game, wishlisted: !game.wishlisted } : game
         ),
       }
+    case 'UPDATE_PLATFORM_OWNERSHIP':
+      return {
+        ...state,
+        games: state.games.map(game =>
+          game.id === action.payload.gameId ? { ...game, platformOwnership: action.payload.platformOwnership } : game
+        ),
+      }
     default:
       return state
   }
@@ -95,6 +113,7 @@ interface GameContextType {
   getGameById: (id: number) => Game | undefined
   toggleWishlist: (id: number) => void
   getWishlistedGames: () => Game[]
+  updatePlatformOwnership: (gameId: number, platformOwnership: PlatformOwnership[]) => void
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -176,6 +195,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return state.games.filter(game => game.wishlisted)
   }
 
+  const updatePlatformOwnership = (gameId: number, platformOwnership: PlatformOwnership[]) => {
+    dispatch({ type: 'UPDATE_PLATFORM_OWNERSHIP', payload: { gameId, platformOwnership } })
+  }
+
   const value: GameContextType = {
     state,
     dispatch,
@@ -186,6 +209,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getGameById,
     toggleWishlist,
     getWishlistedGames,
+    updatePlatformOwnership,
   }
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>

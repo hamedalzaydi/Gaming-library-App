@@ -8,7 +8,8 @@ import {
   TrendingUp,
   Target,
   Award,
-  Heart
+  Heart,
+  Gamepad2
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 
@@ -23,6 +24,27 @@ export default function Profile() {
     const backlog = games.filter(g => g.status === 'backlog').length
     const dropped = games.filter(g => g.status === 'dropped').length
     const wishlisted = games.filter(g => g.wishlisted).length
+    
+    // Platform ownership stats
+    const platformOwnershipStats = games.reduce((acc, game) => {
+      game.platformOwnership?.forEach(ownership => {
+        if (ownership.owned) {
+          // Count games per platform
+          acc.platforms[ownership.platform] = (acc.platforms[ownership.platform] || 0) + 1
+          
+          // Count ownership types
+          acc.ownershipTypes[ownership.ownershipType] = (acc.ownershipTypes[ownership.ownershipType] || 0) + 1
+          
+          // Total owned games
+          acc.totalOwned++
+        }
+      })
+      return acc
+    }, {
+      platforms: {} as Record<string, number>,
+      ownershipTypes: {} as Record<string, number>,
+      totalOwned: 0
+    })
     
     const totalRating = games.reduce((sum, g) => sum + (g.rating || 0), 0)
     const ratedGames = games.filter(g => g.rating).length
@@ -80,6 +102,16 @@ export default function Profile() {
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
 
+    // Get top owned platforms
+    const topOwnedPlatforms = Object.entries(platformOwnershipStats.platforms)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+
+    // Get top ownership types
+    const topOwnershipTypes = Object.entries(platformOwnershipStats.ownershipTypes)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+
     return {
       totalGames,
       playing,
@@ -87,6 +119,7 @@ export default function Profile() {
       backlog,
       dropped,
       wishlisted,
+      totalOwned: platformOwnershipStats.totalOwned,
       averageRating: Math.round(averageRating),
       averagePlaytime: Math.round(averagePlaytime * 10) / 10,
       completionRate: Math.round(completionRate),
@@ -96,6 +129,8 @@ export default function Profile() {
       wishlistedGames,
       topGenres,
       topPlatforms,
+      topOwnedPlatforms,
+      topOwnershipTypes,
       totalPlaytime
     }
   }, [state.games])
@@ -135,7 +170,7 @@ export default function Profile() {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="card bg-primary-900/20 border-primary-700/30">
           <div className="flex items-center space-x-4">
             <div className="p-3 rounded-lg bg-primary-900/30">
@@ -180,6 +215,18 @@ export default function Profile() {
             <div>
               <p className="text-sm font-medium text-gray-400">Completion Rate</p>
               <p className="text-2xl font-bold text-white">{stats.completionRate}%</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-purple-900/20 border-purple-700/30">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-lg bg-purple-900/30">
+              <Gamepad2 className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-400">Platforms Owned</p>
+              <p className="text-2xl font-bold text-white">{stats.totalOwned}</p>
             </div>
           </div>
         </div>
@@ -254,6 +301,29 @@ export default function Profile() {
                   <span className="text-white font-semibold">{count}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Top Owned Platforms */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-white mb-4">Top Owned Platforms</h3>
+            <div className="space-y-3">
+              {stats.topOwnedPlatforms.length === 0 ? (
+                <div className="text-center py-4">
+                  <Gamepad2 className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">No platform ownership data yet</p>
+                </div>
+              ) : (
+                stats.topOwnedPlatforms.map(([platform, count], index) => (
+                  <div key={platform} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg font-bold text-purple-400">#{index + 1}</span>
+                      <span className="text-gray-300">{platform}</span>
+                    </div>
+                    <span className="text-white font-semibold">{count}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -344,6 +414,29 @@ export default function Profile() {
                         {new Date(game.addedDate).toLocaleDateString()}
                       </span>
                     </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Ownership Types */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-white mb-4">Ownership Types</h3>
+            <div className="space-y-3">
+              {stats.topOwnershipTypes.length === 0 ? (
+                <div className="text-center py-4">
+                  <Gamepad2 className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">No ownership data yet</p>
+                </div>
+              ) : (
+                stats.topOwnershipTypes.map(([type, count], index) => (
+                  <div key={type} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg font-bold text-purple-400">#{index + 1}</span>
+                      <span className="text-gray-300 capitalize">{type}</span>
+                    </div>
+                    <span className="text-white font-semibold">{count}</span>
                   </div>
                 ))
               )}

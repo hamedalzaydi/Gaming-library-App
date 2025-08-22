@@ -15,14 +15,16 @@ import {
 } from 'lucide-react'
 import { useGame } from '../contexts/GameContext'
 import { igdbService, IGDBGame } from '../services/igdbService'
+import PlatformOwnershipEditor from '../components/PlatformOwnershipEditor'
 
 export default function GameDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { state, updateGame, removeGame } = useGame()
+  const { state, updateGame, removeGame, updatePlatformOwnership } = useGame()
   const [igdbGame, setIgdbGame] = useState<IGDBGame | null>(null)
   const [loading, setLoading] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [editingPlatformOwnership, setEditingPlatformOwnership] = useState(false)
   const [editForm, setEditForm] = useState({
     status: '',
     rating: '',
@@ -277,6 +279,23 @@ export default function GameDetails() {
               </div>
             )}
           </div>
+
+          {/* Platform Ownership */}
+          {game.platforms && game.platforms.length > 0 && (
+            <div className="card">
+              <PlatformOwnershipEditor
+                platforms={game.platforms}
+                platformOwnership={game.platformOwnership || []}
+                onSave={(platformOwnership) => {
+                  updatePlatformOwnership(game.id, platformOwnership)
+                  setEditingPlatformOwnership(false)
+                }}
+                onCancel={() => setEditingPlatformOwnership(false)}
+                isEditing={editingPlatformOwnership}
+                onEdit={() => setEditingPlatformOwnership(true)}
+              />
+            </div>
+          )}
 
           {/* Summary */}
           {(game.summary || igdbGame?.summary) && (

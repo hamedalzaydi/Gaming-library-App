@@ -173,14 +173,27 @@ export default function GameCard({ game, showActions = true, onStatusChange }: G
         {/* Platforms */}
         {game.platforms && game.platforms.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
-            {game.platforms.slice(0, 2).map((platform, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 bg-primary-900/30 text-primary-300 text-xs rounded-md border border-primary-700/30"
-              >
-                {platform}
-              </span>
-            ))}
+            {game.platforms.slice(0, 2).map((platform, index) => {
+              const ownership = game.platformOwnership?.find(p => p.platform === platform)
+              const isOwned = ownership?.owned || false
+              
+              return (
+                <span
+                  key={index}
+                  className={`px-2 py-1 text-xs rounded-md border ${
+                    isOwned 
+                      ? 'bg-green-900/30 text-green-300 border-green-700/30' 
+                      : 'bg-primary-900/30 text-primary-300 border-primary-700/30'
+                  }`}
+                  title={isOwned ? `Owned on ${platform}` : `Not owned on ${platform}`}
+                >
+                  {platform}
+                  {isOwned && (
+                    <span className="ml-1 text-green-400">✓</span>
+                  )}
+                </span>
+              )
+            })}
             {game.platforms.length > 2 && (
               <span className="px-2 py-1 bg-primary-900/30 text-primary-400 text-xs rounded-md border border-primary-700/30">
                 +{game.platforms.length - 2}

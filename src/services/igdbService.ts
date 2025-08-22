@@ -175,6 +175,16 @@ class IGDBService {
 
   // Helper method to convert IGDB game to our Game interface
   convertToGame(igdbGame: IGDBGame) {
+    // Create platform ownership entries for each platform
+    const platformOwnership = igdbGame.platforms?.map(platform => ({
+      platform: platform.name,
+      owned: false,
+      ownershipType: 'other' as const,
+      purchaseDate: undefined,
+      purchasePrice: undefined,
+      notes: undefined,
+    })) || []
+
     return {
       id: igdbGame.id,
       name: igdbGame.name,
@@ -182,6 +192,7 @@ class IGDBService {
       summary: igdbGame.summary,
       genres: igdbGame.genres?.map(g => g.name),
       platforms: igdbGame.platforms?.map(p => p.name),
+      platformOwnership,
       releaseDate: igdbGame.first_release_date ? new Date(igdbGame.first_release_date * 1000).toISOString() : undefined,
       rating: igdbGame.aggregated_rating || igdbGame.rating,
       status: 'backlog' as const,

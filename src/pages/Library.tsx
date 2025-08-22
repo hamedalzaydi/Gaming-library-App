@@ -20,6 +20,7 @@ export default function Library() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [genreFilter, setGenreFilter] = useState<string>('all')
   const [platformFilter, setPlatformFilter] = useState<string>('all')
+  const [ownershipFilter, setOwnershipFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('addedDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
@@ -39,12 +40,20 @@ export default function Library() {
   const filteredAndSortedGames = useMemo(() => {
     let filtered = state.games.filter(game => {
       const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           game.summary?.toLowerCase().includes(searchQuery.toLowerCase())
+        game.genres?.some(genre => genre.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || game.status === statusFilter
       const matchesGenre = genreFilter === 'all' || game.genres?.includes(genreFilter)
       const matchesPlatform = platformFilter === 'all' || game.platforms?.includes(platformFilter)
       
-      return matchesSearch && matchesStatus && matchesGenre && matchesPlatform
+      // Ownership filter
+      let matchesOwnership = true
+      if (ownershipFilter === 'owned') {
+        matchesOwnership = game.platformOwnership?.some(p => p.owned) || false
+      } else if (ownershipFilter === 'not-owned') {
+        matchesOwnership = !game.platformOwnership?.some(p => p.owned)
+      }
+      
+      return matchesSearch && matchesStatus && matchesGenre && matchesPlatform && matchesOwnership
     })
 
     // Sort games
@@ -57,10 +66,6 @@ export default function Library() {
           aValue = a.name.toLowerCase()
           bValue = b.name.toLowerCase()
           break
-        case 'addedDate':
-          aValue = new Date(a.addedDate).getTime()
-          bValue = new Date(b.addedDate).getTime()
-          break
         case 'rating':
           aValue = a.rating || 0
           bValue = b.rating || 0
@@ -69,8 +74,11 @@ export default function Library() {
           aValue = a.releaseDate ? new Date(a.releaseDate).getTime() : 0
           bValue = b.releaseDate ? new Date(b.releaseDate).getTime() : 0
           break
+        case 'addedDate':
         default:
-          return 0
+          aValue = new Date(a.addedDate).getTime()
+          bValue = new Date(b.addedDate).getTime()
+          break
       }
 
       if (sortOrder === 'asc') {
@@ -81,7 +89,7 @@ export default function Library() {
     })
 
     return filtered
-  }, [state.games, searchQuery, statusFilter, genreFilter, platformFilter, sortBy, sortOrder])
+  }, [state.games, searchQuery, statusFilter, genreFilter, platformFilter, ownershipFilter, sortBy, sortOrder])
 
   const handleStatusChange = (gameId: number, newStatus: string) => {
     const game = state.games.find(g => g.id === gameId)
@@ -95,6 +103,9 @@ export default function Library() {
     setStatusFilter('all')
     setGenreFilter('all')
     setPlatformFilter('all')
+    setOwnershipFilter('all')
+    setSortBy('addedDate')
+    setSortOrder('desc')
   }
 
   const statusCounts = {
@@ -191,6 +202,20 @@ export default function Library() {
             </select>
           </div>
 
+          {/* Ownership Filter */}
+          <div className="flex items-center space-x-2">
+            <Filter className="w-4 h-4 text-gray-400" />
+            <select
+              value={ownershipFilter}
+              onChange={(e) => setOwnershipFilter(e.target.value)}
+              className="input-field text-sm"
+            >
+              <option value="all">All Ownership</option>
+              <option value="owned">Owned</option>
+              <option value="not-owned">Not Owned</option>
+            </select>
+          </div>
+
           {/* Sort */}
           <div className="flex items-center space-x-2">
             <SortAsc className="w-4 h-4 text-gray-400" />
@@ -239,7 +264,7 @@ export default function Library() {
           </div>
 
           {/* Clear Filters */}
-          {(searchQuery || statusFilter !== 'all' || genreFilter !== 'all' || platformFilter !== 'all') && (
+          {(searchQuery || statusFilter !== 'all' || genreFilter !== 'all' || platformFilter !== 'all' || ownershipFilter !== 'all') && (
             <button
               onClick={clearFilters}
               className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
