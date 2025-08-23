@@ -256,6 +256,70 @@ export default function Library() {
 
         {/* Additional Filters */}
         <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-dark-600">
+          {/* Active Filters Indicator */}
+          {(searchQuery || statusFilter !== 'all' || genreFilter !== 'all' || platformFilter !== 'all' || ownershipFilter !== 'all' || storefrontFilter !== 'all' || subscriptionFilter !== 'all') && (
+            <div className="w-full mb-2">
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <span>Active filters:</span>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="px-2 py-1 bg-blue-900/30 text-blue-300 rounded-md border border-blue-700/30 hover:bg-blue-800/40 transition-colors"
+                  >
+                    Search: "{searchQuery}" ×
+                  </button>
+                )}
+                {statusFilter !== 'all' && (
+                  <button
+                    onClick={() => setStatusFilter('all')}
+                    className="px-2 py-1 bg-green-900/30 text-green-300 rounded-md border border-green-700/30 hover:bg-green-800/40 transition-colors"
+                  >
+                    Status: {statusFilter} ×
+                  </button>
+                )}
+                {genreFilter !== 'all' && (
+                  <button
+                    onClick={() => setGenreFilter('all')}
+                    className="px-2 py-1 bg-purple-900/30 text-purple-300 rounded-md border border-purple-700/30 hover:bg-purple-800/40 transition-colors"
+                  >
+                    Genre: {genreFilter} ×
+                  </button>
+                )}
+                {platformFilter !== 'all' && (
+                  <button
+                    onClick={() => setPlatformFilter('all')}
+                    className="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-md border border-yellow-700/30 hover:bg-yellow-800/40 transition-colors"
+                  >
+                    Platform: {platformFilter} ×
+                  </button>
+                )}
+                {ownershipFilter !== 'all' && (
+                  <button
+                    onClick={() => setOwnershipFilter('all')}
+                    className="px-2 py-1 bg-orange-900/30 text-orange-300 rounded-md border border-orange-700/30 hover:bg-orange-800/40 transition-colors"
+                  >
+                    Ownership: {ownershipFilter === 'owned' ? 'Owned' : 'Not Owned'} ×
+                  </button>
+                )}
+                {storefrontFilter !== 'all' && (
+                  <button
+                    onClick={() => setStorefrontFilter('all')}
+                    className="px-2 py-1 bg-blue-900/30 text-blue-300 rounded-md border border-blue-700/30 hover:bg-blue-800/40 transition-colors"
+                  >
+                    Storefront: {storefrontFilter} ×
+                  </button>
+                )}
+                {subscriptionFilter !== 'all' && (
+                  <button
+                    onClick={() => setSubscriptionFilter('all')}
+                    className="px-2 py-1 bg-green-900/30 text-green-300 rounded-md border border-green-700/30 hover:bg-green-800/40 transition-colors"
+                  >
+                    Subscription: {subscriptionFilter === 'no-subscription' ? 'No Subscription' : subscriptionFilter} ×
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           {/* Genre Filter */}
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium text-gray-300">Genre Filter</label>
@@ -378,14 +442,15 @@ export default function Library() {
           </div>
 
           {/* Clear Filters */}
-          {(searchQuery || statusFilter !== 'all' || genreFilter !== 'all' || platformFilter !== 'all' || ownershipFilter !== 'all') && (
+          <div className="flex items-center">
             <button
               onClick={clearFilters}
-              className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors duration-200 flex items-center space-x-2"
             >
-              Clear Filters
+              <Filter className="w-4 h-4" />
+              <span>Clear All Filters</span>
             </button>
-          )}
+          </div>
         </div>
       </div>
 
