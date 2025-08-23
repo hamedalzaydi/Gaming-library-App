@@ -8,7 +8,8 @@ import {
   FileText,
   Store,
   CreditCard,
-  Gamepad2
+  Gamepad2,
+  Package
 } from 'lucide-react'
 import { PlatformOwnership, Storefront, SubscriptionService } from '../contexts/GameContext'
 
@@ -22,6 +23,8 @@ interface PlatformOwnershipEditorProps {
 }
 
 const storefrontOptions: { value: Storefront; label: string; category: string }[] = [
+  // Physical Copies
+  { value: 'Physical', label: 'Physical Copy', category: 'Physical Copies' },
   // PC Storefronts
   { value: 'Steam', label: 'Steam', category: 'PC' },
   { value: 'Epic Games Store', label: 'Epic Games Store', category: 'PC' },
@@ -94,6 +97,11 @@ export default function PlatformOwnershipEditor({
 
   const getStorefrontIcon = (storefront: Storefront | null) => {
     if (!storefront) return <Gamepad2 className="w-4 h-4" />
+    
+    // Physical Copies
+    if (storefront === 'Physical') {
+      return <Package className="w-4 h-4" />
+    }
     
     // PC Storefronts
     if (['Steam', 'Epic Games Store', 'GOG Galaxy', 'Battle.net', 'Origin', 'EA App', 'Ubisoft Connect', 'Rockstar Games Launcher', 'Bethesda.net', 'Microsoft Store', 'itch.io', 'Humble Store', 'Green Man Gaming', 'Fanatical'].includes(storefront)) {

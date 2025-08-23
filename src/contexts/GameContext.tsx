@@ -29,6 +29,8 @@ export interface PlatformOwnership {
 }
 
 export type Storefront = 
+  // Physical Copies
+  | 'Physical'
   // PC Storefronts
   | 'Steam' | 'Epic Games Store' | 'GOG Galaxy' | 'Battle.net' | 'Origin' | 'EA App' | 'Ubisoft Connect' | 'Rockstar Games Launcher' | 'Bethesda.net' | 'Microsoft Store' | 'itch.io' | 'Humble Store' | 'Green Man Gaming' | 'Fanatical'
   // Console Storefronts
