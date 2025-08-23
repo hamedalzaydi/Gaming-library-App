@@ -21,43 +21,121 @@ export default function Library() {
   const [genreFilter, setGenreFilter] = useState<string>('all')
   const [platformFilter, setPlatformFilter] = useState<string>('all')
   const [ownershipFilter, setOwnershipFilter] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<SortOption>('addedDate')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [storefrontFilter, setStorefrontFilter] = useState<string>('all')
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('name')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
-  // Get unique genres and platforms from games
-  const genres = useMemo(() => {
-    const allGenres = state.games.flatMap(game => game.genres || [])
-    return ['all', ...Array.from(new Set(allGenres))]
+  // Get unique values for filter options
+  const allGenres = useMemo(() => {
+    const genres = new Set<string>()
+    state.games.forEach(game => {
+      game.genres?.forEach(genre => genres.add(genre))
+    })
+    return Array.from(genres).sort()
   }, [state.games])
 
-  const platforms = useMemo(() => {
-    const allPlatforms = state.games.flatMap(game => game.platforms || [])
-    return ['all', ...Array.from(new Set(allPlatforms))]
+  const allPlatforms = useMemo(() => {
+    const platforms = new Set<string>()
+    state.games.forEach(game => {
+      game.platforms?.forEach(platform => platforms.add(platform))
+    })
+    return Array.from(platforms).sort()
+  }, [state.games])
+
+  const allStorefronts = useMemo(() => {
+    const storefronts = new Set<string>()
+    state.games.forEach(game => {
+      game.platformOwnership?.forEach(ownership => {
+        if (ownership.owned && ownership.storefront) {
+          storefronts.add(ownership.storefront)
+        }
+      })
+    })
+    return Array.from(storefronts).sort()
+  }, [state.games])
+
+  const allSubscriptions = useMemo(() => {
+    const subscriptions = new Set<string>()
+    state.games.forEach(game => {
+      game.platformOwnership?.forEach(ownership => {
+        if (ownership.owned && ownership.subscriptionService) {
+          subscriptions.add(ownership.subscriptionService)
+        }
+      })
+    })
+    return Array.from(subscriptions).sort()
   }, [state.games])
 
   // Filter and sort games
   const filteredAndSortedGames = useMemo(() => {
-    let filtered = state.games.filter(game => {
-      const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        game.genres?.some(genre => genre.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesStatus = statusFilter === 'all' || game.status === statusFilter
-      const matchesGenre = genreFilter === 'all' || game.genres?.includes(genreFilter)
-      const matchesPlatform = platformFilter === 'all' || game.platforms?.includes(platformFilter)
-      
-      // Ownership filter
-      let matchesOwnership = true
-      if (ownershipFilter === 'owned') {
-        matchesOwnership = game.platformOwnership?.some(p => p.owned) || false
-      } else if (ownershipFilter === 'not-owned') {
-        matchesOwnership = !game.platformOwnership?.some(p => p.owned)
-      }
-      
-      return matchesSearch && matchesStatus && matchesGenre && matchesPlatform && matchesOwnership
-    })
+    let filtered = state.games
 
-    // Sort games
-    filtered.sort((a, b) => {
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(game => 
+        game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        game.genres?.some(genre => genre.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(game => game.status === statusFilter)
+    }
+
+    // Apply genre filter
+    if (genreFilter !== 'all') {
+      filtered = filtered.filter(game => game.genres?.includes(genreFilter))
+    }
+
+    // Apply platform filter
+    if (platformFilter !== 'all') {
+      filtered = filtered.filter(game => game.platforms?.includes(platformFilter))
+    }
+
+    // Apply ownership filter
+    if (ownershipFilter !== 'all') {
+      if (ownershipFilter === 'owned') {
+        filtered = filtered.filter(game => 
+          game.platformOwnership?.some(ownership => ownership.owned)
+        )
+      } else if (ownershipFilter === 'not-owned') {
+        filtered = filtered.filter(game => 
+          !game.platformOwnership?.some(ownership => ownership.owned)
+        )
+      }
+    }
+
+    // Apply storefront filter
+    if (storefrontFilter !== 'all') {
+      filtered = filtered.filter(game => 
+        game.platformOwnership?.some(ownership => 
+          ownership.owned && ownership.storefront === storefrontFilter
+        )
+      )
+    }
+
+    // Apply subscription filter
+    if (subscriptionFilter !== 'all') {
+      if (subscriptionFilter === 'no-subscription') {
+        filtered = filtered.filter(game => 
+          game.platformOwnership?.some(ownership => 
+            ownership.owned && !ownership.subscriptionService
+          )
+        )
+      } else {
+        filtered = filtered.filter(game => 
+          game.platformOwnership?.some(ownership => 
+            ownership.owned && ownership.subscriptionService === subscriptionFilter
+          )
+        )
+      }
+    }
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
       let aValue: any
       let bValue: any
 
@@ -66,19 +144,25 @@ export default function Library() {
           aValue = a.name.toLowerCase()
           bValue = b.name.toLowerCase()
           break
-        case 'rating':
-          aValue = a.rating || 0
-          bValue = b.rating || 0
+        case 'addedDate':
+          aValue = new Date(a.addedDate).getTime()
+          bValue = new Date(b.addedDate).getTime()
           break
         case 'releaseDate':
           aValue = a.releaseDate ? new Date(a.releaseDate).getTime() : 0
           bValue = b.releaseDate ? new Date(b.releaseDate).getTime() : 0
           break
-        case 'addedDate':
-        default:
-          aValue = new Date(a.addedDate).getTime()
-          bValue = new Date(b.addedDate).getTime()
+        case 'rating':
+          aValue = a.rating || 0
+          bValue = b.rating || 0
           break
+        case 'playtime':
+          aValue = a.playtime || 0
+          bValue = b.playtime || 0
+          break
+        default:
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
       }
 
       if (sortOrder === 'asc') {
@@ -88,8 +172,8 @@ export default function Library() {
       }
     })
 
-    return filtered
-  }, [state.games, searchQuery, statusFilter, genreFilter, platformFilter, ownershipFilter, sortBy, sortOrder])
+    return sorted
+  }, [state.games, searchQuery, statusFilter, genreFilter, platformFilter, ownershipFilter, storefrontFilter, subscriptionFilter, sortBy, sortOrder])
 
   const handleStatusChange = (gameId: number, newStatus: string) => {
     const game = state.games.find(g => g.id === gameId)
@@ -104,8 +188,10 @@ export default function Library() {
     setGenreFilter('all')
     setPlatformFilter('all')
     setOwnershipFilter('all')
-    setSortBy('addedDate')
-    setSortOrder('desc')
+    setStorefrontFilter('all')
+    setSubscriptionFilter('all')
+    setSortBy('name')
+    setSortOrder('asc')
   }
 
   const statusCounts = {
@@ -171,48 +257,76 @@ export default function Library() {
         {/* Additional Filters */}
         <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-dark-600">
           {/* Genre Filter */}
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-gray-400" />
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-300">Genre Filter</label>
             <select
               value={genreFilter}
               onChange={(e) => setGenreFilter(e.target.value)}
-              className="input-field text-sm"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre === 'all' ? 'All Genres' : genre}
-                </option>
+              <option value="all">All Genres</option>
+              {allGenres.map((genre) => (
+                <option key={genre} value={genre}>{genre}</option>
               ))}
             </select>
           </div>
 
           {/* Platform Filter */}
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-gray-400" />
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-300">Platform Filter</label>
             <select
               value={platformFilter}
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="input-field text-sm"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {platforms.map((platform) => (
-                <option key={platform} value={platform}>
-                  {platform === 'all' ? 'All Platforms' : platform}
-                </option>
+              <option value="all">All Platforms</option>
+              {allPlatforms.map((platform) => (
+                <option key={platform} value={platform}>{platform}</option>
               ))}
             </select>
           </div>
 
           {/* Ownership Filter */}
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-gray-400" />
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-300">Ownership Filter</label>
             <select
               value={ownershipFilter}
               onChange={(e) => setOwnershipFilter(e.target.value)}
-              className="input-field text-sm"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Ownership</option>
               <option value="owned">Owned</option>
               <option value="not-owned">Not Owned</option>
+            </select>
+          </div>
+
+          {/* Storefront Filter */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-300">Storefront Filter</label>
+            <select
+              value={storefrontFilter}
+              onChange={(e) => setStorefrontFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {allStorefronts.map(storefront => (
+                <option key={storefront} value={storefront}>{storefront}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Subscription Filter */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-300">Subscription Filter</label>
+            <select
+              value={subscriptionFilter}
+              onChange={(e) => setSubscriptionFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Subscriptions</option>
+              <option value="no-subscription">No Subscription</option>
+              {allSubscriptions.map(subscription => (
+                <option key={subscription} value={subscription}>{subscription}</option>
+              ))}
             </select>
           </div>
 
@@ -313,3 +427,4 @@ export default function Library() {
     </div>
   )
 }
+
