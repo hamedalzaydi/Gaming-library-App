@@ -14,7 +14,7 @@ import { useGame } from '../contexts/GameContext'
 import { igdbService, IGDBGame } from '../services/igdbService'
 
 export default function Search() {
-  const { addGame, state, toggleWishlist } = useGame()
+  const { addGame, state, toggleWishlist, addToast } = useGame()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<IGDBGame[]>([])
   const [loading, setLoading] = useState(false)
@@ -93,6 +93,9 @@ export default function Search() {
     const gameData = igdbService.convertToGame(igdbGame)
     addGame(gameData)
     
+    // Show toast notification for adding to library
+    addToast(`"${igdbGame.name}" added to library! 🎮`, 'success', 3000)
+    
     // Show success feedback
     const button = document.querySelector(`[data-game-id="${igdbGame.id}"]`) as HTMLButtonElement
     if (button) {
@@ -116,11 +119,14 @@ export default function Search() {
     if (existingGame) {
       // If game exists in library, toggle its wishlist status
       toggleWishlist(existingGame.id)
+      // Toast notification will be handled by toggleWishlist in GameContext
     } else {
       // If game doesn't exist in library, add it as wishlisted
       const gameData = igdbService.convertToGame(igdbGame)
       const wishlistedGame = { ...gameData, wishlisted: true }
       addGame(wishlistedGame)
+      // Show toast notification for adding to wishlist
+      addToast(`"${igdbGame.name}" added to wishlist! ❤️`, 'success', 3000)
     }
   }
 

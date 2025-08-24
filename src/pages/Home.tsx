@@ -16,7 +16,7 @@ import { igdbService, IGDBGame } from '../services/igdbService'
 import GameCard from '../components/GameCard'
 
 export default function Home() {
-  const { state, addGame, toggleWishlist } = useGame()
+  const { state, addGame, toggleWishlist, addToast } = useGame()
   const [popularGames, setPopularGames] = useState<IGDBGame[]>([])
   const [upcomingGames, setUpcomingGames] = useState<IGDBGame[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,6 +47,8 @@ export default function Home() {
   const handleAddGame = (igdbGame: IGDBGame) => {
     const gameData = igdbService.convertToGame(igdbGame)
     addGame(gameData)
+    // Show toast notification for adding to library
+    addToast(`"${igdbGame.name}" added to library! 🎮`, 'success', 3000)
   }
 
   const handleWishlistToggle = (igdbGame: IGDBGame) => {
@@ -56,11 +58,14 @@ export default function Home() {
     if (existingGame) {
       // If game exists in library, toggle its wishlist status
       toggleWishlist(existingGame.id)
+      // Toast notification will be handled by toggleWishlist in GameContext
     } else {
       // If game doesn't exist in library, add it as wishlisted
       const gameData = igdbService.convertToGame(igdbGame)
       const wishlistedGame = { ...gameData, wishlisted: true }
       addGame(wishlistedGame)
+      // Show toast notification for adding to wishlist
+      addToast(`"${igdbGame.name}" added to wishlist! ❤️`, 'success', 3000)
     }
   }
 

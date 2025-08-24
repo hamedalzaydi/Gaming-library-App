@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
-import { GameProvider } from './contexts/GameContext'
+import { GameProvider, useGame } from './contexts/GameContext'
 import Layout from './components/Layout'
+import { ToastContainer } from './components/Toast'
 import Home from './pages/Home'
 import Library from './pages/Library'
 import Search from './pages/Search'
@@ -9,9 +10,11 @@ import GameDetails from './pages/GameDetails'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 
-function App() {
+function AppContent() {
+  const { state, removeToast } = useGame()
+  
   return (
-    <GameProvider>
+    <>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -23,6 +26,15 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
+      <ToastContainer toasts={state.toasts} onRemove={removeToast} />
+    </>
+  )
+}
+
+function App() {
+  return (
+    <GameProvider>
+      <AppContent />
     </GameProvider>
   )
 }

@@ -46,6 +46,14 @@ A comprehensive gaming library application that helps you catalog, track, and ma
 - **Intuitive navigation** with sidebar layout
 - **Gaming-inspired typography** and icons
 
+### 🆕 **NEW: Enhanced Game Details & Discovery**
+- **Similar Games Section**: Discover related games based on genres and ratings
+- **Rich Game Information**: Comprehensive details including developers, publishers, themes, game modes, and player perspectives
+- **Enhanced Related Content**: Navigate DLCs, expansions, and bundles within the application
+- **Smart Library Integration**: Related content automatically adds to your library for seamless exploration
+- **Advanced Game Metadata**: Access to alternate names, release dates for different platforms, and age ratings
+- **Interactive Content**: Click on related games to explore them without leaving the app
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -100,23 +108,25 @@ A comprehensive gaming library application that helps you catalog, track, and ma
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── Layout.tsx      # Main layout with navigation
-│   └── GameCard.tsx    # Game display component
-├── contexts/           # React contexts
-│   └── GameContext.tsx # Game state management
-├── pages/              # Page components
-│   ├── Home.tsx        # Dashboard/home page
-│   ├── Library.tsx     # Game library management
-│   ├── Search.tsx      # Game discovery/search
-│   ├── GameDetails.tsx # Individual game details
-│   ├── Profile.tsx     # User statistics/profile
-│   └── Settings.tsx    # App settings & data management
-├── services/           # API services
-│   └── igdbService.ts  # IGDB API integration
-├── App.tsx             # Main app component
-├── main.tsx            # App entry point
-└── index.css           # Global styles & Tailwind
+├── components/                    # Reusable UI components
+│   ├── Layout.tsx               # Main layout with navigation
+│   ├── GameCard.tsx             # Game display component
+│   ├── PlatformOwnershipEditor.tsx # Platform ownership management
+│   └── SimilarGamesSection.tsx  # Similar games discovery component
+├── contexts/                     # React contexts
+│   └── GameContext.tsx          # Game state management
+├── pages/                        # Page components
+│   ├── Home.tsx                 # Dashboard/home page
+│   ├── Library.tsx              # Game library management
+│   ├── Search.tsx               # Game discovery/search
+│   ├── GameDetails.tsx          # Enhanced individual game details
+│   ├── Profile.tsx              # User statistics/profile
+│   └── Settings.tsx             # App settings & data management
+├── services/                     # API services
+│   └── igdbService.ts           # Enhanced IGDB API integration
+├── App.tsx                      # Main app component
+├── main.tsx                     # App entry point
+└── index.css                    # Global styles & Tailwind
 ```
 
 ## 🎯 Usage Guide
@@ -132,6 +142,26 @@ src/
 2. Use filters to organize games by status, genre, or platform
 3. Click on any game to view details
 4. Change status, add ratings, or update playtime
+
+### 🆕 **Enhanced Game Details Experience**
+1. **Rich Information Display**: View comprehensive game details including:
+   - **Game Information**: Genres, platforms, release date, IGDB rating
+   - **Additional Details**: Developers, publishers, themes, game modes, player perspectives, age ratings
+   - **Alternate Names**: Discover different titles and regional variations
+   - **Release Information**: Platform-specific release dates and regions
+   - **Related Content**: DLCs, expansions, standalone expansions, and bundles
+
+2. **Similar Games Discovery**: 
+   - **Smart Recommendations**: Find games similar to what you're viewing based on genres
+   - **Seamless Navigation**: Click on similar games to explore them within the app
+   - **Library Integration**: Similar games automatically add to your library for easy access
+   - **Rich Previews**: See ratings, release dates, and genres for each recommendation
+
+3. **Interactive Related Content**:
+   - **DLCs & Expansions**: Navigate to downloadable content and expansion packs
+   - **Game Bundles**: Explore complete game collections and special editions
+   - **Smart Navigation**: All related content opens within the application
+   - **Automatic Library Addition**: Related content becomes part of your collection
 
 ### Platform Ownership Management
 1. **View Ownership**: See which platforms you own each game on in the game cards and details
@@ -174,6 +204,7 @@ src/
 - **[React Router](https://reactrouter.com/)** - Client-side routing
 - **[Lucide React](https://lucide.dev/)** - Beautiful icons
 - **[IGDB API](https://api.igdb.com/)** - Game database
+- **[Node.js](https://nodejs.org/)** - Backend proxy server
 
 ## 🔧 Available Scripts
 
@@ -182,6 +213,23 @@ src/
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint errors
+- `node server.js` - Start backend proxy server
+
+## 🚀 **Quick Start Scripts**
+
+For Windows users, we provide PowerShell scripts to quickly start the application:
+
+- **`start-app-final.ps1`** - Complete startup script with health checks
+- **`start-app-improved.ps1`** - Enhanced startup with better error handling
+- **`start-app-terminal.ps1`** - Terminal-based startup script
+- **`start-simple.ps1`** - Simple startup script for basic usage
+
+### Using Startup Scripts:
+1. Right-click on any `.ps1` file
+2. Select "Run with PowerShell"
+3. The script will automatically start both backend and frontend services
+4. Wait for confirmation that both services are running
+5. Access your app at `http://localhost:3000`
 
 ## 📱 Responsive Design
 
@@ -227,6 +275,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - IGDB API rate limits may apply for heavy usage
 - Some games may not have complete metadata
 - Mobile performance may vary on older devices
+- ~~IGDB API "Invalid Field" errors for certain fields~~ ✅ **RESOLVED**
+- ~~"Invalid filter operation" errors~~ ✅ **RESOLVED**
 
 ## 🔮 Future Features
 
@@ -238,6 +288,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Game time tracking integration
 - [ ] Achievement sharing
 - [ ] Multi-language support
+- [x] **Similar Games Discovery** ✅ **IMPLEMENTED**
+- [x] **Enhanced Game Details** ✅ **IMPLEMENTED**
+- [x] **Interactive Related Content** ✅ **IMPLEMENTED**
+- [x] **Platform Ownership Management** ✅ **IMPLEMENTED**
+- [x] **Wishlist Functionality** ✅ **IMPLEMENTED**
 
 ## 📞 Support
 
@@ -246,6 +301,27 @@ If you encounter any issues or have questions:
 1. Check the [Issues](https://github.com/yourusername/gaming-library-app/issues) page
 2. Create a new issue with detailed information
 3. Include your browser, OS, and steps to reproduce
+
+## 🎯 **Recent Updates & Enhancements**
+
+### **Game Page Enhancement (Latest)**
+- ✅ **Similar Games Section**: Intelligent game recommendations based on genres
+- ✅ **Enhanced Related Content**: Seamless navigation for DLCs, expansions, and bundles
+- ✅ **Rich Game Metadata**: Comprehensive information display including developers, publishers, themes
+- ✅ **Smart Library Integration**: Related content automatically becomes part of your collection
+- ✅ **Improved User Experience**: Better organized layout and navigation
+
+### **Platform Ownership Features**
+- ✅ **Storefront Selection**: Choose from Steam, Epic, PlayStation Store, Xbox Store, and more
+- ✅ **Subscription Services**: Track Xbox Game Pass, PlayStation Plus, EA Play, and others
+- ✅ **Physical Media Support**: Include physical copies in your collection
+- ✅ **Advanced Filtering**: Filter library by ownership status and platform
+
+### **Core Features**
+- ✅ **IGDB API Integration**: Rich game database with comprehensive metadata
+- ✅ **Wishlist Management**: Track games you want to play
+- ✅ **Library Organization**: Advanced filtering, sorting, and status tracking
+- ✅ **Data Export/Import**: Backup and restore your gaming collection
 
 ---
 

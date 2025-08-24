@@ -28,6 +28,13 @@ export interface PlatformOwnership {
   notes?: string
 }
 
+export interface Toast {
+  id: string
+  message: string
+  type: 'success' | 'info' | 'warning' | 'error'
+  duration?: number
+}
+
 export type Storefront = 
   // Physical Copies
   | 'Physical'
@@ -54,6 +61,7 @@ export interface GameState {
   error: string | null
   searchResults: Game[]
   currentGame: Game | null
+  toasts: Toast[]
 }
 
 export type GameAction =
@@ -67,6 +75,8 @@ export type GameAction =
   | { type: 'SET_CURRENT_GAME'; payload: Game | null }
   | { type: 'TOGGLE_WISHLIST'; payload: number }
   | { type: 'UPDATE_PLATFORM_OWNERSHIP'; payload: { gameId: number; platformOwnership: PlatformOwnership[] } }
+  | { type: 'ADD_TOAST'; payload: Toast }
+  | { type: 'REMOVE_TOAST'; payload: string }
 
 // Initial state
 const initialState: GameState = {
@@ -75,6 +85,7 @@ const initialState: GameState = {
   error: null,
   searchResults: [],
   currentGame: null,
+  toasts: [],
 }
 
 // Reducer
@@ -118,6 +129,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           game.id === action.payload.gameId ? { ...game, platformOwnership: action.payload.platformOwnership } : game
         ),
       }
+    case 'ADD_TOAST':
+      return {
+        ...state,
+        toasts: [...state.toasts, action.payload],
+      }
+    case 'REMOVE_TOAST':
+      return {
+        ...state,
+        toasts: state.toasts.filter(toast => toast.id !== action.payload),
+      }
     default:
       return state
   }
@@ -135,6 +156,8 @@ interface GameContextType {
   toggleWishlist: (id: number) => void
   getWishlistedGames: () => Game[]
   updatePlatformOwnership: (gameId: number, platformOwnership: PlatformOwnership[]) => void
+  addToast: (message: string, type: Toast['type'], duration?: number) => void
+  removeToast: (id: string) => void
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -160,6 +183,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('gameLibrary', JSON.stringify(state.games))
   }, [state.games])
+
+  // Auto-remove toasts after duration
+  useEffect(() => {
+    state.toasts.forEach(toast => {
+      if (toast.duration) {
+        const timer = setTimeout(() => {
+          removeToast(toast.id)
+        }, toast.duration)
+        return () => clearTimeout(timer)
+      }
+    })
+  }, [state.toasts])
 
   // Helper functions
   const addGame = (gameData: Omit<Game, 'id' | 'addedDate'>) => {
@@ -209,7 +244,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const toggleWishlist = (id: number) => {
-    dispatch({ type: 'TOGGLE_WISHLIST', payload: id })
+    const game = state.games.find(g => g.id === id)
+    if (game) {
+      const newWishlistedState = !game.wishlisted
+      dispatch({ type: 'TOGGLE_WISHLIST', payload: id })
+      
+      // Show toast notification
+      const message = newWishlistedState 
+        ? `"${game.name}" added to wishlist! ❤️`
+        : `"${game.name}" removed from wishlist 💔`
+      addToast(message, 'success', 3000)
+    }
   }
 
   const getWishlistedGames = () => {
@@ -218,6 +263,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const updatePlatformOwnership = (gameId: number, platformOwnership: PlatformOwnership[]) => {
     dispatch({ type: 'UPDATE_PLATFORM_OWNERSHIP', payload: { gameId, platformOwnership } })
+  }
+
+  const addToast = (message: string, type: Toast['type'], duration: number = 3000) => {
+    const id = Date.now().toString()
+    const toast: Toast = { id, message, type, duration }
+    dispatch({ type: 'ADD_TOAST', payload: toast })
+  }
+
+  const removeToast = (id: string) => {
+    dispatch({ type: 'REMOVE_TOAST', payload: id })
   }
 
   const value: GameContextType = {
@@ -231,6 +286,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     toggleWishlist,
     getWishlistedGames,
     updatePlatformOwnership,
+    addToast,
+    removeToast,
   }
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
