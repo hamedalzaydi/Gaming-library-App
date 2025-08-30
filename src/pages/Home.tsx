@@ -46,7 +46,7 @@ export default function Home() {
 
   const handleAddGame = (igdbGame: IGDBGame) => {
     const gameData = igdbService.convertToGame(igdbGame)
-    addGame(gameData)
+    addGame(gameData, igdbGame.id)
     // Show toast notification for adding to library
     addToast(`"${igdbGame.name}" added to library! 🎮`, 'success', 3000)
   }
@@ -63,7 +63,7 @@ export default function Home() {
       // If game doesn't exist in library, add it as wishlisted
       const gameData = igdbService.convertToGame(igdbGame)
       const wishlistedGame = { ...gameData, wishlisted: true }
-      addGame(wishlistedGame)
+      addGame(wishlistedGame, igdbGame.id)
       // Show toast notification for adding to wishlist
       addToast(`"${igdbGame.name}" added to wishlist! ❤️`, 'success', 3000)
     }

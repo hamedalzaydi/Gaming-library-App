@@ -148,7 +148,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 interface GameContextType {
   state: GameState
   dispatch: React.Dispatch<GameAction>
-  addGame: (game: Omit<Game, 'id' | 'addedDate'>) => void
+  addGame: (game: Omit<Game, 'id' | 'addedDate'>, preserveId?: number) => void
   updateGame: (game: Game) => void
   removeGame: (id: number) => void
   searchGames: (query: string) => Promise<void>
@@ -158,6 +158,7 @@ interface GameContextType {
   updatePlatformOwnership: (gameId: number, platformOwnership: PlatformOwnership[]) => void
   addToast: (message: string, type: Toast['type'], duration?: number) => void
   removeToast: (id: string) => void
+  cleanupDuplicates: () => void
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -197,14 +198,52 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.toasts])
 
   // Helper functions
-  const addGame = (gameData: Omit<Game, 'id' | 'addedDate'>) => {
+  const addGame = (gameData: Omit<Game, 'id' | 'addedDate'>, preserveId?: number) => {
+    // Check if a game with the same name already exists
+    const existingGame = state.games.find(g => 
+      g.name.toLowerCase() === gameData.name.toLowerCase()
+    )
+    
+    if (existingGame) {
+      // If game exists, don't add a duplicate - just show a toast
+      addToast(`"${gameData.name}" is already in your library! 🎮`, 'info', 3000)
+      return
+    }
+
+    // Use the preserved ID if provided (for IGDB games), otherwise generate a unique local ID
+    const gameId = preserveId || (Date.now() + Math.floor(Math.random() * 1000))
+    
     const newGame: Game = {
       ...gameData,
-      id: Date.now(),
+      id: gameId,
       addedDate: new Date().toISOString(),
       wishlisted: gameData.wishlisted || false,
     }
     dispatch({ type: 'ADD_GAME', payload: newGame })
+  }
+
+  // Function to clean up duplicate games (useful for existing libraries)
+  const cleanupDuplicates = () => {
+    const seenNames = new Set<string>()
+    const uniqueGames: Game[] = []
+    let duplicatesRemoved = 0
+    
+    state.games.forEach(game => {
+      const normalizedName = game.name.toLowerCase().trim()
+      if (seenNames.has(normalizedName)) {
+        duplicatesRemoved++
+      } else {
+        seenNames.add(normalizedName)
+        uniqueGames.push(game)
+      }
+    })
+    
+    if (duplicatesRemoved > 0) {
+      dispatch({ type: 'SET_GAMES', payload: uniqueGames })
+      addToast(`Cleaned up ${duplicatesRemoved} duplicate game(s)`, 'success', 3000)
+    } else {
+      addToast('No duplicates found in your library', 'info', 3000)
+    }
   }
 
   const updateGame = (game: Game) => {
@@ -288,6 +327,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     updatePlatformOwnership,
     addToast,
     removeToast,
+    cleanupDuplicates,
   }
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>

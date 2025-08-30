@@ -46,7 +46,7 @@ export default function SimilarGamesSection({ currentGame, similarGames, loading
       // If game doesn't exist, add it to the library first
       const convertedGame = igdbService.convertToGame(game)
       lastAddedGameName.current = game.name // Track the game being added
-      addGame(convertedGame)
+      addGame(convertedGame, game.id)
       
       // Navigation will happen in the useEffect when the game is added to state
     } catch (error) {

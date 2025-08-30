@@ -14,7 +14,7 @@ import {
 import { useGame } from '../contexts/GameContext'
 
 export default function Settings() {
-  const { state, dispatch } = useGame()
+  const { state, dispatch, cleanupDuplicates } = useGame()
   const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error'>('idle')
   const [importStatus, setImportStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle')
   const [importData, setImportData] = useState('')
@@ -197,6 +197,29 @@ export default function Settings() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Cleanup Duplicates */}
+        <div className="card border-yellow-700/30">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <span>Library Maintenance</span>
+          </h3>
+          <p className="text-gray-400 mb-4">
+            Clean up duplicate games in your library. This will remove games with the same name, keeping the first occurrence.
+          </p>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={cleanupDuplicates}
+              className="btn-outline text-yellow-400 hover:text-yellow-300 hover:border-yellow-400 flex items-center space-x-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Cleanup Duplicates</span>
+            </button>
+            <span className="text-sm text-gray-500">
+              Helps prevent wishlist duplicates
+            </span>
           </div>
         </div>
 

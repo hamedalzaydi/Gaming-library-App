@@ -742,7 +742,7 @@ export default function GameDetails() {
 
                                   // If DLC doesn't exist, add it to the library first
                                   const convertedGame = igdbService.convertToGame(dlc)
-                                  addGame(convertedGame)
+                                  addGame(convertedGame, dlc.id)
                                   
                                   // Find the newly added game and navigate to it
                                   const newGame = state.games.find(g => g.name.toLowerCase() === dlc.name.toLowerCase())
@@ -804,7 +804,7 @@ export default function GameDetails() {
 
                                   // If expansion doesn't exist, add it to the library first
                                   const convertedGame = igdbService.convertToGame(expansion)
-                                  addGame(convertedGame)
+                                  addGame(convertedGame, expansion.id)
                                   
                                   // Find the newly added game and navigate to it
                                   const newGame = state.games.find(g => g.name.toLowerCase() === expansion.name.toLowerCase())
@@ -866,7 +866,7 @@ export default function GameDetails() {
 
                                   // If standalone expansion doesn't exist, add it to the library first
                                   const convertedGame = igdbService.convertToGame(expansion)
-                                  addGame(convertedGame)
+                                  addGame(convertedGame, expansion.id)
                                   
                                   // Find the newly added game and navigate to it
                                   const newGame = state.games.find(g => g.name.toLowerCase() === expansion.name.toLowerCase())
@@ -930,7 +930,7 @@ export default function GameDetails() {
 
                                   // If bundle doesn't exist, add it to the library first
                                   const convertedGame = igdbService.convertToGame(bundle)
-                                  addGame(convertedGame)
+                                  addGame(convertedGame, bundle.id)
                                   
                                   // Find the newly added game and navigate to it
                                   const newGame = state.games.find(g => g.name.toLowerCase() === bundle.name.toLowerCase())
